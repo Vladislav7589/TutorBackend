@@ -21,13 +21,13 @@ class Tutor(models.Model):
     brief_info = models.CharField(max_length=255)
     educational_institution = models.CharField(max_length=100)
     def __str__(self):
-        return f'ID: {self.tutor_id}'
+        return f'{self.tutor_id}'
 
 class Student(models.Model):
     student_id = models.OneToOneField(CustomUser, primary_key=True, on_delete=models.CASCADE)
     education_level = models.CharField(max_length=100)
     def __str__(self):
-        return f'ID: {self.student_id}'
+        return f'{self.student_id}'
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -56,7 +56,7 @@ class Subject(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
-        return f'Id: {self.subject_id} name: {self.name}'
+        return f'{self.subject_id}: {self.name}'
 
 
 class Lesson(models.Model):
@@ -74,7 +74,7 @@ class TutorSubject(models.Model):
     subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
 
 
-class TutorRequest(models.Model):
+class StudentRequest(models.Model):
     subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
     student_id = models.ForeignKey(Student, on_delete=models.CASCADE)
 

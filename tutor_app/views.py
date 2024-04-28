@@ -3,10 +3,10 @@ from django.views.generic import ListView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
-from .models import Student, Tutor, Subject, Lesson, TutorSubject, TutorRequest, Record, Payment
+from .models import Student, Tutor, Subject, Lesson, TutorSubject, StudentRequest, Record, Payment
 from tutor_app.models import CustomUser
 from .serializers import SubjectSerializer, StudentSerializer, TutorSerializer, UsersSerializer, LessonSerializer, \
-    TutorSubjectSerializer, TutorRequestSerializer, RecordSerializer
+    TutorSubjectSerializer, RecordSerializer, StudentRequestSerializer
 
 
 def index(request):
@@ -55,9 +55,9 @@ class TutorSubjectViewSet(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = []
 
-class TutorRequestViewSet(ModelViewSet):
-    queryset = TutorRequest.objects.all()
-    serializer_class = TutorRequestSerializer
+class StudentRequestViewSet(ModelViewSet):
+    queryset = StudentRequest.objects.all()
+    serializer_class = StudentRequestSerializer
     filterset_fields = ['student_id']
     filter_backends = [SearchFilter]
     search_fields = []

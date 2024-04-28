@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Student, Tutor, Subject, Lesson, TutorSubject, TutorRequest, Record, Payment, CustomUser
+from .models import Student, Tutor, Subject, Lesson, TutorSubject, Record, Payment, CustomUser, \
+    StudentRequest
 
 
 class SubjectSerializer(ModelSerializer):
@@ -32,9 +33,9 @@ class TutorSubjectSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class TutorRequestSerializer(ModelSerializer):
+class StudentRequestSerializer(ModelSerializer):
     class Meta:
-        model = TutorRequest
+        model = StudentRequest
         fields = '__all__'
 
 
