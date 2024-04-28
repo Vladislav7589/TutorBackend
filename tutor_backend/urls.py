@@ -20,10 +20,19 @@ from rest_framework.routers import SimpleRouter
 from tutor_app import views
 from django.urls import include, path
 
-from tutor_app.views import SubjectViewSet
+from tutor_app.views import SubjectViewSet, StudentViewSet, TutorViewSet, LessonViewSet, TutorSubjectViewSet, \
+    TutorRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet
 
 router = SimpleRouter()
 router.register(r'subjects', SubjectViewSet)
+router.register(r'students', StudentViewSet)
+router.register(r'tutors', TutorViewSet)
+router.register(r'lessons', LessonViewSet)
+router.register(r'tutorSubject', TutorSubjectViewSet)
+router.register(r'tutorRequest', TutorRequestViewSet)
+router.register(r'record', RecordViewSet)
+router.register(r'payment', PaymentViewSet)
+router.register(r'users', UsersViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

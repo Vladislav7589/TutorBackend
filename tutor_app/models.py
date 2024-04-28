@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework import filters
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 
 class CustomUser(AbstractUser):
@@ -16,11 +20,35 @@ class Tutor(models.Model):
     education_level = models.CharField(max_length=100)
     brief_info = models.CharField(max_length=255)
     educational_institution = models.CharField(max_length=100)
-
+    def __str__(self):
+        return f'ID: {self.tutor_id}'
 
 class Student(models.Model):
     student_id = models.OneToOneField(CustomUser, primary_key=True, on_delete=models.CASCADE)
     education_level = models.CharField(max_length=100)
+    def __str__(self):
+        return f'ID: {self.student_id}'
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        if instance.user_type == 'Tutor':
+            Tutor.objects.create(tutor_id=instance)
+        elif instance.user_type == 'Student':
+            Student.objects.create(student_id=instance)
+
+
+@receiver(post_save, sender=CustomUser)
+def save_user_profile(sender, instance, **kwargs):
+    if instance.user_type == 'Tutor':
+        instance.tutor.save()
+    elif instance.user_type == 'Student':
+        instance.student.save()
+
+
+# @receiver(pre_delete, sender=Tutor)
+# def delete_related_user(sender, instance, **kwargs):
+#     if instance.tutor_id:
+#         instance.tutor_id.delete()
 
 
 class Subject(models.Model):
