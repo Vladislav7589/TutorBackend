@@ -1,13 +1,20 @@
+from django.core import serializers
 from django.http import HttpResponse
 from django.views.generic import ListView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from .models import Student, Tutor, Subject, Lesson, TutorSubject, StudentRequest, Record, Payment
 from tutor_app.models import CustomUser
 from .serializers import SubjectSerializer, StudentSerializer, TutorSerializer, UsersSerializer, LessonSerializer, \
     TutorSubjectSerializer, RecordSerializer, StudentRequestSerializer
-
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
 
 def index(request):
     return HttpResponse("Hello, world")
@@ -44,9 +51,10 @@ class LessonViewSet(ModelViewSet):
 class UsersViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UsersSerializer
-    filterset_fields = ['id', 'subject_id', 'city']
+    filterset_fields = ['id', 'city']
     filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'last_name']
+    #permission_classes = [IsAuthenticated]
+    #search_fields = ['first_name', 'last_name']
 
 class TutorSubjectViewSet(ModelViewSet):
     queryset = TutorSubject.objects.all()
@@ -76,3 +84,41 @@ class PaymentViewSet(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = []
 
+
+@api_view(['POST'])
+def register_user(request):
+    serializer = UsersSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['POST'])
+def email_login(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    # Пытаемся получить пользователя по адресу электронной почты
+    try:
+        user = CustomUser.objects.get(password=password)
+    except CustomUser.DoesNotExist:
+        user = None
+    user_data = serializers.serialize('json', [user])
+    print(user.check_password(password))
+
+    if user is not None and user.check_password(password):
+        # Пользователь успешно аутентифицирован
+        # Возвращаем токены доступа и обновления
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    else:
+        # Пользователь не найден или неверный пароль
+        return Response({'error': f'Invalid credentials   ${user_data}'}, status=status.HTTP_401_UNAUTHORIZED)

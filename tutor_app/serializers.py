@@ -1,4 +1,6 @@
 from rest_framework.serializers import ModelSerializer
+from rest_framework_simplejwt.serializers import PasswordField
+
 from .models import Student, Tutor, Subject, Lesson, TutorSubject, Record, Payment, CustomUser, \
     StudentRequest
 
@@ -52,6 +54,7 @@ class PaymentSerializer(ModelSerializer):
 
 
 class UsersSerializer(ModelSerializer):
+
     class Meta:
         model = CustomUser
         fields = '__all__'

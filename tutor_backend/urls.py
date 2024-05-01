@@ -16,13 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from rest_framework.routers import SimpleRouter
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from tutor_app import views
 from django.urls import include, path
 
 from tutor_app.views import SubjectViewSet, StudentViewSet, TutorViewSet, LessonViewSet, TutorSubjectViewSet, \
-    StudentRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet
-
+    StudentRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet, register_user, \
+    email_login
 router = SimpleRouter()
 router.register(r'subjects', SubjectViewSet)
 router.register(r'students', StudentViewSet)
@@ -36,6 +37,14 @@ router.register(r'users', UsersViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    path('api/register/', register_user, name='register_user'),
+    path('api/login/', email_login, name='email_login'),
+
     path("", views.index, name="index")
     # Добавьте другие маршруты...
 ]
