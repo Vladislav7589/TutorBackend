@@ -20,6 +20,14 @@ from django.contrib.auth.models import User
 def index(request):
     return HttpResponse("Hello, world")
 
+class UsersViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filterset_fields = ['id']
+    filter_backends = [SearchFilter]
+    #permission_classes = [IsAuthenticated]
+    #search_fields = ['first_name', 'last_name']
+
 
 class StudentViewSet(ModelViewSet):
     queryset = Student.objects.all()
@@ -48,15 +56,6 @@ class LessonViewSet(ModelViewSet):
     filterset_fields = ['lesson_id', 'date']
     filter_backends = [SearchFilter]
     search_fields = ['date']
-
-class UsersViewSet(ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    #filterset_fields = ['id', 'c]
-    filter_backends = [SearchFilter]
-    #permission_classes = [IsAuthenticated]
-    #search_fields = ['first_name', 'last_name']
-
 class TutorSubjectViewSet(ModelViewSet):
     queryset = TutorSubject.objects.all()
     serializer_class = TutorSubjectSerializer
@@ -91,10 +90,14 @@ def register_user(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+
         refresh = RefreshToken.for_user(user)
+        user_data = UserSerializer(user).data
+        user_id = user_data['id']
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'id': user_id,  # Добавляем данные о пользователе
         })
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -104,20 +107,25 @@ def register_user(request):
 def email_login(request):
     email = request.data.get('email')
     password = request.data.get('password')
-    # Пытаемся получить пользователя по адресу электронной почты
+
     try:
         user = User.objects.get(email=email)
+
     except CustomUser.DoesNotExist:
         user = None
 
     if user is not None and user.check_password(password):
-        # Пользователь успешно аутентифицирован
-        # Возвращаем токены доступа и обновления
+
         refresh = RefreshToken.for_user(user)
+
+        user_data = UserSerializer(user).data
+        user_id = user_data['id']
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'id': user_id,
         })
     else:
         # Пользователь не найден или неверный пароль
         return Response({'error': f'Invalid credentials '}, status=status.HTTP_401_UNAUTHORIZED)
+
