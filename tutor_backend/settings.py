@@ -27,11 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    # Другие хеш-функции паролей, если используются
-]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ( # add this first.
         'rest_framework.renderers.JSONRenderer',
@@ -169,7 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'tutor_app.CustomUser'
+#AUTH_USER_MODEL = 'tutor_app.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

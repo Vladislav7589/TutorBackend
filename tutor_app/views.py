@@ -10,11 +10,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Student, Tutor, Subject, Lesson, TutorSubject, StudentRequest, Record, Payment
 from tutor_app.models import CustomUser
 from .serializers import SubjectSerializer, StudentSerializer, TutorSerializer, UsersSerializer, LessonSerializer, \
-    TutorSubjectSerializer, RecordSerializer, StudentRequestSerializer
+    TutorSubjectSerializer, RecordSerializer, StudentRequestSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 def index(request):
     return HttpResponse("Hello, world")
@@ -49,9 +50,9 @@ class LessonViewSet(ModelViewSet):
     search_fields = ['date']
 
 class UsersViewSet(ModelViewSet):
-    queryset = CustomUser.objects.all()
-    serializer_class = UsersSerializer
-    filterset_fields = ['id', 'city']
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    #filterset_fields = ['id', 'c]
     filter_backends = [SearchFilter]
     #permission_classes = [IsAuthenticated]
     #search_fields = ['first_name', 'last_name']
@@ -87,7 +88,7 @@ class PaymentViewSet(ModelViewSet):
 
 @api_view(['POST'])
 def register_user(request):
-    serializer = UsersSerializer(data=request.data)
+    serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
@@ -105,11 +106,9 @@ def email_login(request):
     password = request.data.get('password')
     # Пытаемся получить пользователя по адресу электронной почты
     try:
-        user = CustomUser.objects.get(password=password)
+        user = User.objects.get(email=email)
     except CustomUser.DoesNotExist:
         user = None
-    user_data = serializers.serialize('json', [user])
-    print(user.check_password(password))
 
     if user is not None and user.check_password(password):
         # Пользователь успешно аутентифицирован
@@ -121,4 +120,4 @@ def email_login(request):
         })
     else:
         # Пользователь не найден или неверный пароль
-        return Response({'error': f'Invalid credentials   ${user_data}'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': f'Invalid credentials '}, status=status.HTTP_401_UNAUTHORIZED)
