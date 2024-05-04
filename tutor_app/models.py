@@ -1,15 +1,49 @@
+from django.contrib.auth.models import BaseUserManager
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-class CustomUser(models.Model):
-    custom_id = models.AutoField(primary_key=True)
-    city = models.CharField(max_length=100)
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        """
+        Создает и возвращает пользователя с указанным email и паролем.
+        """
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Создает и возвращает суперпользователя с указанным email и паролем.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class CustomUser(AbstractUser):
+    objects = CustomUserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ["password"]
+    email = models.EmailField(unique=True, null=False)
+    middle_name = models.CharField(blank=True, max_length=150)
+    username = None
+    city = models.CharField(max_length=100, null=True)
     date_of_birth = models.DateField(null=True)
-    phone = models.CharField(max_length=20)
-    user_type = models.CharField(max_length=100)  # Student/Tutor
+    phone = models.CharField(max_length=20, null=True)
+    user_type = models.CharField(max_length=100, )  # Student/Tutor
 
 
 class Tutor(models.Model):
@@ -17,14 +51,19 @@ class Tutor(models.Model):
     education_level = models.CharField(max_length=100)
     brief_info = models.CharField(max_length=255)
     educational_institution = models.CharField(max_length=100)
+
     def __str__(self):
         return f'{self.tutor_id}'
+
 
 class Student(models.Model):
     student_id = models.OneToOneField(CustomUser, primary_key=True, on_delete=models.CASCADE)
     education_level = models.CharField(max_length=100)
+
     def __str__(self):
         return f'{self.student_id}'
+
+
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -82,10 +121,19 @@ class Record(models.Model):
 
 
 class Payment(models.Model):
-    payment_id = models.AutoField(primary_key=True)
     lesson_id = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
     payment_status = models.CharField(max_length=100)
 
-# Create your models here.
+
+class Review(models.Model):
+    tutor_id = models.ForeignKey(Tutor, on_delete=models.CASCADE)
+    student_id = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date_and_time = models.DateTimeField()
+    rating = models.IntegerField()
+    feedback = models.TextField()
+
+    def __str__(self):
+        return f'Оценка о {self.tutor} от {self.student}'
+

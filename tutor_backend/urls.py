@@ -23,7 +23,8 @@ from django.urls import include, path
 
 from tutor_app.views import SubjectViewSet, StudentViewSet, TutorViewSet, LessonViewSet, TutorSubjectViewSet, \
     StudentRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet, register_user, \
-    email_login
+    email_login, TutorWithReviewsListView
+
 router = SimpleRouter()
 router.register(r'subjects', SubjectViewSet)
 router.register(r'students', StudentViewSet)
@@ -41,6 +42,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    path('api/tutor_list/', TutorWithReviewsListView.as_view(), name='get'),
 
     path('api/register/', register_user, name='register_user'),
     path('api/login/', email_login, name='email_login'),
