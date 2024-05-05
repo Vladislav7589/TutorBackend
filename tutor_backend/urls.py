@@ -23,7 +23,7 @@ from django.urls import include, path
 
 from tutor_app.views import SubjectViewSet, StudentViewSet, TutorViewSet, LessonViewSet, TutorSubjectViewSet, \
     StudentRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet, register_user, \
-    email_login, TutorWithReviewsListView
+    email_login, TutorWithReviewsListView, ReviewViewSet, ReviewsViewSet
 
 router = SimpleRouter()
 router.register(r'subjects', SubjectViewSet)
@@ -35,6 +35,7 @@ router.register(r'tutorRequest', StudentRequestViewSet)
 router.register(r'record', RecordViewSet)
 router.register(r'payment', PaymentViewSet)
 router.register(r'users', UsersViewSet)
+router.register(r'reviews', ReviewsViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

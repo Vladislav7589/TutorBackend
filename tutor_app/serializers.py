@@ -84,6 +84,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['student_id', 'date_and_time', 'rating', 'feedback']
 
+class ReviewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
 
 class TutorWithReviewsSerializer(serializers.ModelSerializer):
     user = UserSerializer()

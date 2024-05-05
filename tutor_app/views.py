@@ -12,7 +12,7 @@ from .models import Student, Tutor, Subject, Lesson, TutorSubject, StudentReques
 from tutor_app.models import CustomUser
 from .serializers import SubjectSerializer, StudentSerializer, TutorSerializer, LessonSerializer, \
     TutorSubjectSerializer, RecordSerializer, StudentRequestSerializer, UserSerializer, TutorWithReviewsSerializer, \
-    CustomTutorSerializer, ReviewSerializer
+    CustomTutorSerializer, ReviewSerializer, ReviewsSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -97,12 +97,21 @@ class PaymentViewSet(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = []
 
+
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     filterset_fields = ['tutor_id_id', 'student_id_id']
     filter_backends = [SearchFilter]
     search_fields = []
+
+class ReviewsViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewsSerializer
+    filterset_fields = ['tutor_id_id', 'student_id_id']
+    filter_backends = [SearchFilter]
+    search_fields = []
+
 
 @api_view(['POST'])
 def register_user(request):
@@ -153,19 +162,16 @@ def email_login(request):
 
 
 class TutorWithReviewsListView(APIView):
+    #permission_classes = [IsAuthenticated]
+    #filterset_fields = ['city']
     def get(self, request):
-        # Получение параметров запроса для поиска
+
         search_params = request.query_params
-
-        # Фильтрация объектов Tutor на основе параметров запроса
-        tutors = Tutor.objects.all()
-
-        # Применение фильтров
+        tutors_list = Tutor.objects.all()
         if 'city' in search_params:
-            tutors = tutors.filter(tutor_id__city=search_params['city'])
-        if 'education_level' in search_params:
-            tutors = tutors.filter(education_level=search_params['education_level'])
-        # Добавьте другие поля для фильтрации, если необходимо
+            tutors_list = tutors_list.filter(tutor_id__city=search_params['city'])
+        if 'subject' in search_params:
+            tutors_list = tutors_list.filter(tutorsubject__subject_id=search_params['subject'])
 
-        serializer = CustomTutorSerializer(tutors, many=True)
+        serializer = CustomTutorSerializer(tutors_list, many=True)
         return Response(serializer.data)
