@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.core import serializers
 from django.http import HttpResponse
 from django.views.generic import ListView
@@ -7,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Student, Tutor, Subject, Lesson, TutorSubject, StudentRequest, Record, Payment, Review
 from tutor_app.models import CustomUser
 from .serializers import SubjectSerializer, StudentSerializer, TutorSerializer, LessonSerializer, \
@@ -30,8 +31,15 @@ class UsersViewSet(ModelViewSet):
     serializer_class = UserSerializer
     filterset_fields = ['id']
     filter_backends = [SearchFilter]
+    parser_classes = [MultiPartParser, FormParser]
     #permission_classes = [IsAuthenticated]
     #search_fields = ['first_name', 'last_name']
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class StudentViewSet(ModelViewSet):
@@ -175,3 +183,13 @@ class TutorWithReviewsListView(APIView):
 
         serializer = CustomTutorSerializer(tutors_list, many=True)
         return Response(serializer.data)
+
+class UserProfileUploadAvatar(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def update(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

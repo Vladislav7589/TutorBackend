@@ -42,6 +42,7 @@ class CustomUser(AbstractUser):
     date_of_birth = models.DateField(null=True)
     phone = models.CharField(max_length=20, null=True)
     user_type = models.CharField(max_length=100, )  # Student/Tutor
+    image = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
 
 class Tutor(models.Model):

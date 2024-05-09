@@ -17,13 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-
+from django.conf import settings
+from django.conf.urls.static import static
 from tutor_app import views
 from django.urls import include, path
 
 from tutor_app.views import SubjectViewSet, StudentViewSet, TutorViewSet, LessonViewSet, TutorSubjectViewSet, \
     StudentRequestViewSet, RecordViewSet, PaymentViewSet, UsersViewSet, register_user, \
-    email_login, TutorWithReviewsListView, ReviewViewSet, ReviewsViewSet
+    email_login, TutorWithReviewsListView, ReviewViewSet, ReviewsViewSet, UserProfileUploadAvatar
 
 router = SimpleRouter()
 router.register(r'subjects', SubjectViewSet)
@@ -48,8 +49,8 @@ urlpatterns = [
 
     path('api/register/', register_user, name='register_user'),
     path('api/login/', email_login, name='email_login'),
-
     path("", views.index, name="index")
     # Добавьте другие маршруты...
 ]
 urlpatterns += router.urls
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

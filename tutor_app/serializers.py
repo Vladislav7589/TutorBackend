@@ -18,7 +18,20 @@ class UserSerializer(ModelSerializer):
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
         return user
-
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+    def get_image(self, obj):
+        if obj.image:
+            full_url = obj.image.url
+            base_url = "http://localhost:8000"
+            relative_url = full_url.replace(base_url, "")
+            return "ntcnsdsfsdfs"
 
 class SubjectSerializer(ModelSerializer):
     class Meta:
